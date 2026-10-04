@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+
 import '../models/food_model.dart';
 import '../widgets/category_card.dart';
 import '../widgets/food_card.dart';
@@ -17,13 +18,13 @@ class HomeScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final categories = [
-      {'name': 'Pizza', 'icon': Icons.local_pizza},
-      {'name': 'Burger', 'icon': Icons.lunch_dining},
-      {'name': 'Chicken', 'icon': Icons.set_meal},
-      {'name': 'Pasta', 'icon': Icons.ramen_dining},
-      {'name': 'Drinks', 'icon': Icons.local_cafe},
+      {'name': 'Foods', 'icon': Icons.restaurant},
+      {'name': 'Drinks', 'icon': Icons.coffee},
+      {'name': 'Bakery', 'icon': Icons.bakery_dining_rounded},
       {'name': 'Dessert', 'icon': Icons.icecream},
     ];
+    // 1. Filter makanan yang status isPopular-nya true
+    final popularFoods = dummyFoods.where((food) => food.isPopular).toList();
 
     return SafeArea(
       child: ListView(
@@ -37,15 +38,15 @@ class HomeScreen extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'Belom tau namanya apa',
+                      'noom noom',
                       style: TextStyle(
-                        color: kPrimary,
+                        color: Color(0xFF3B302A),
                         fontSize: 28,
                         fontWeight: FontWeight.bold,
                       ),
                     ),
                     Text(
-                      'Pesan makanan favoritmu',
+                      'Selamat Siang!',
                       style: TextStyle(color: Colors.grey),
                     ),
                   ],
@@ -61,9 +62,9 @@ class HomeScreen extends StatelessWidget {
 
           // Banner promo
           Container(
-            padding: const EdgeInsets.all(20),
+            padding: const EdgeInsets.all(30),
             decoration: BoxDecoration(
-              color: kPrimary,
+              color: kTextDark,
               borderRadius: BorderRadius.circular(20),
             ),
             child: const Row(
@@ -73,30 +74,30 @@ class HomeScreen extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        'Diskon 20%',
+                        'FIRST BITE, FIRST SIP',
                         style: TextStyle(
                           color: Colors.white,
-                          fontSize: 24,
+                          fontSize: 20,
                           fontWeight: FontWeight.bold,
                         ),
                       ),
-                      SizedBox(height: 4),
+                      SizedBox(height: 15),
                       Text(
-                        'Untuk pemesanan pertama kamu',
-                        style: TextStyle(color: Colors.white70),
+                        '20% OFF',
+                        style: TextStyle(color: Colors.white70, fontSize: 19),
                       ),
                     ],
                   ),
                 ),
-                Icon(Icons.local_offer, color: Colors.white70, size: 60),
+                Icon(Icons.local_offer, color: Colors.white, size: 55),
               ],
             ),
           ),
-          const SizedBox(height: 24),
+          const SizedBox(height: 30),
 
           // Kategori makanan
           const Text(
-            'Kategori',
+            'Explore',
             style: TextStyle(
               color: kTextDark,
               fontSize: 18,
@@ -119,11 +120,11 @@ class HomeScreen extends StatelessWidget {
               },
             ),
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: 30),
 
-          // Rekomendasi makanan
+          // Rekomendasi menu
           const Text(
-            'Rekomendasi Untukmu',
+            'Popular at noom noom',
             style: TextStyle(
               color: kTextDark,
               fontSize: 18,
@@ -135,9 +136,10 @@ class HomeScreen extends StatelessWidget {
             height: 250,
             child: ListView.builder(
               scrollDirection: Axis.horizontal,
-              itemCount: dummyFoods.length,
+              itemCount: popularFoods.length,
+              // <-- Ubah jadi panjang popularFoods
               itemBuilder: (context, index) {
-                final food = dummyFoods[index];
+                final food = popularFoods[index]; // <-- Ambil dari popularFoods
                 return SizedBox(
                   width: 170,
                   child: FoodCard(
@@ -156,6 +158,18 @@ class HomeScreen extends StatelessWidget {
                   ),
                 );
               },
+            ),
+          ),
+          const SizedBox(height: 30),
+
+          // Banner
+          ClipRRect(
+            borderRadius: BorderRadius.circular(20),
+            child: Image.asset(
+              'assets/images/banner.png',
+              width: double.infinity,
+              height: 180,
+              fit: BoxFit.cover,
             ),
           ),
         ],

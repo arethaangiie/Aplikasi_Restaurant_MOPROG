@@ -191,23 +191,53 @@ class _DetailMenuScreenState extends State<DetailMenuScreen> {
                   ),
                   const SizedBox(height: 20),
 
-                  buildOptionGroup('Ukuran', sizes, selectedSize, (value) {
-                    setState(() {
-                      selectedSize = value;
-                    });
-                  }),
-                  buildOptionGroup('Topping', toppings, selectedTopping,
+                  if (food.category == 'Drinks') ...[
+                    buildOptionGroup(
+                      'Ukuran',
+                      sizes,
+                      selectedSize,
+                          (value) {
+                        setState(() {
+                          selectedSize = value;
+                        });
+                      },
+                    ),
+                  ],
+
+                  if (food.category == 'Foods') ...[
+                    buildOptionGroup(
+                      'Ukuran',
+                      sizes,
+                      selectedSize,
+                          (value) {
+                        setState(() {
+                          selectedSize = value;
+                        });
+                      },
+                    ),
+
+                    buildOptionGroup(
+                      'Topping',
+                      toppings,
+                      selectedTopping,
                           (value) {
                         setState(() {
                           selectedTopping = value;
                         });
-                      }),
-                  buildOptionGroup('Level Pedas', spicyLevels, selectedSpicy,
+                      },
+                    ),
+
+                    buildOptionGroup(
+                      'Level Pedas',
+                      spicyLevels,
+                      selectedSpicy,
                           (value) {
                         setState(() {
                           selectedSpicy = value;
                         });
-                      }),
+                      },
+                    ),
+                  ],
                 ],
               ),
             ),
