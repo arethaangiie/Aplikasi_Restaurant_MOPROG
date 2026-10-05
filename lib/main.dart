@@ -47,6 +47,7 @@ class MainScreen extends StatefulWidget {
 class _MainScreenState extends State<MainScreen> {
   int currentIndex = 0;
   String menuCategory = 'All';
+  String orderType = 'delivery'; //default delivery
 
   // Data keranjang disimpan di sini
   final List<CartItemModel> cartItems = [];
@@ -123,6 +124,7 @@ class _MainScreenState extends State<MainScreen> {
           onDecrease: decreaseQuantity,
           onRemove: removeItem,
           onOrderPlaced: clearCart,
+          orderType: orderType,
         );
       default:
         return const ProfileScreen();

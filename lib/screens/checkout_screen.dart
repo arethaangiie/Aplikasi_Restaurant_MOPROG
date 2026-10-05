@@ -7,6 +7,7 @@ class CheckoutScreen extends StatefulWidget {
   final int deliveryFee;
   final int total;
   final VoidCallback onOrderPlaced;
+  final String orderType;
 
   const CheckoutScreen({
     super.key,
@@ -15,6 +16,7 @@ class CheckoutScreen extends StatefulWidget {
     required this.deliveryFee,
     required this.total,
     required this.onOrderPlaced,
+    this.orderType = 'delivery',
   });
 
   @override
@@ -25,12 +27,25 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
   final TextEditingController addressController =
   TextEditingController(text: 'Jl. Merdeka No. 10, Bandung');
 
+  final TextEditingController tableController = TextEditingController();
+
+  String selectedBranch = branches[0];
+
+  late String selectedOrderType;
+
   final List<String> paymentMethods = ['Cash', 'E-Wallet', 'Bank Transfer'];
   String selectedPayment = 'Cash';
 
   @override
+  void initState() {
+    super.initState();
+    selectedOrderType = widget.orderType;
+  }
+
+  @override
   void dispose() {
     addressController.dispose();
+    tableController.dispose();
     super.dispose();
   }
 
@@ -39,6 +54,68 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
     if (method == 'E-Wallet') return Icons.account_balance_wallet;
     return Icons.account_balance;
   }
+
+  IconData orderTypeIcon(String type) {
+    switch (type) {
+      case 'dine-in':
+        return Icons.restaurant;
+      case 'takeaway':
+        return Icons.shopping_bag;
+      case 'delivery':
+      default:
+        return Icons.delivery_dining;
+    }
+  }
+
+  String orderTypeLabel(String type) {
+    switch (type) {
+      case 'dine-in':
+        return 'Dine-In';
+      case 'takeaway':
+        return 'Takeaway';
+      case 'delivery':
+      default:
+        return 'Delivery';
+    }
+  }
+
+  String orderTypeDescription(String type) {
+    switch (type) {
+      case 'dine-in':
+        return 'Makan di tempat • Pilih cabang & nomor meja';
+      case 'takeaway':
+        return 'Bawa pulang • Pilih cabang • +Rp 2.000';
+      case 'delivery':
+      default:
+        return 'Diantar ke alamat • +Rp 10.000';
+    }
+  }
+
+  int get currentFee {
+    switch (selectedOrderType) {
+      case 'dine-in':
+        return 0;
+      case 'takeaway':
+        return takeawayCharge;
+      case 'delivery':
+      default:
+        return deliveryFee;
+    }
+  }
+
+  String get feeLabel {
+    switch (selectedOrderType) {
+      case 'dine-in':
+        return 'Service Charge';
+      case 'takeaway':
+        return 'Takeaway Charge';
+      case 'delivery':
+      default:
+        return 'Delivery Fee';
+    }
+  }
+
+  int get currentTotal => widget.subtotal + currentFee;
 
   Widget sectionTitle(String text) {
     return Padding(
@@ -77,6 +154,94 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
             ),
           ),
         ],
+      ),
+    );
+  }
+
+  Widget buildOrderTypeOption(String type) {
+    final isSelected = type == selectedOrderType;
+    return GestureDetector(
+      onTap: () {
+        setState(() {
+          selectedOrderType = type;
+        });
+      },
+      child: Container(
+        margin: const EdgeInsets.only(bottom: 8),
+        padding: const EdgeInsets.all(14),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(14),
+          border: Border.all(
+            color: isSelected ? kPrimary : Colors.grey.shade300,
+            width: isSelected ? 2 : 1,
+          ),
+        ),
+        child: Row(
+          children: [
+            Icon(orderTypeIcon(type), color: kPrimary),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    orderTypeLabel(type),
+                    style: const TextStyle(
+                      color: kTextDark,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                  Text(
+                    orderTypeDescription(type),
+                    style: const TextStyle(
+                      color: Colors.grey,
+                      fontSize: 12,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            Icon(
+              isSelected ? Icons.check_circle : Icons.circle_outlined,
+              color: isSelected ? kPrimary : Colors.grey,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget buildBranchSelector() {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 14),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(14),
+      ),
+      child: DropdownButtonHideUnderline(
+        child: DropdownButton<String>(
+          value: selectedBranch,
+          isExpanded: true,
+          icon: const Icon(Icons.keyboard_arrow_down, color: kPrimary),
+          items: branches.map((branch) {
+            return DropdownMenuItem<String>(
+              value: branch,
+              child: Row(
+                children: [
+                  const Icon(Icons.store, color: kPrimary, size: 20),
+                  const SizedBox(width: 10),
+                  Text(branch),
+                ],
+              ),
+            );
+          }).toList(),
+          onChanged: (value) {
+            setState(() {
+              selectedBranch = value!;
+            });
+          },
+        ),
       ),
     );
   }
@@ -124,6 +289,39 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
   }
 
   void placeOrder() {
+    // Validasi nomor meja untuk dine-in
+    if (selectedOrderType == 'dine-in' && tableController.text.trim().isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Mohon isi nomor meja terlebih dahulu'),
+          backgroundColor: Colors.red,
+        ),
+      );
+      return;
+    }
+
+    // Validasi alamat untuk delivery
+    if (selectedOrderType == 'delivery' &&
+        addressController.text.trim().isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Mohon isi alamat pengiriman'),
+          backgroundColor: Colors.red,
+        ),
+      );
+      return;
+    }
+
+    // Info tambahan untuk dialog
+    String extraInfo = '';
+    if (selectedOrderType == 'dine-in') {
+      extraInfo = 'Cabang: $selectedBranch\nMeja: ${tableController.text}';
+    } else if (selectedOrderType == 'takeaway') {
+      extraInfo = 'Cabang: $selectedBranch';
+    } else {
+      extraInfo = 'Alamat: ${addressController.text}';
+    }
+
     showDialog(
       context: context,
       barrierDismissible: false,
@@ -149,7 +347,10 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
               ),
               const SizedBox(height: 8),
               Text(
-                'Total ${formatRupiah(widget.total)}\nPembayaran: $selectedPayment',
+                'Tipe: ${orderTypeLabel(selectedOrderType)}\n'
+                    '$extraInfo\n'
+                    'Total: ${formatRupiah(currentTotal)}\n'
+                    'Pembayaran: $selectedPayment',
                 textAlign: TextAlign.center,
                 style: const TextStyle(color: Colors.grey),
               ),
@@ -160,9 +361,9 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
               width: double.infinity,
               child: ElevatedButton(
                 onPressed: () {
-                  Navigator.pop(ctx); // tutup dialog
-                  Navigator.pop(context); // kembali dari checkout
-                  widget.onOrderPlaced(); // kosongkan keranjang
+                  Navigator.pop(ctx);
+                  Navigator.pop(context);
+                  widget.onOrderPlaced();
                 },
                 child: const Text('OK'),
               ),
@@ -190,7 +391,59 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // Ringkasan pesanan
+                  // ===== 1. TIPE PESANAN =====
+                  sectionTitle('Tipe Pesanan'),
+                  buildOrderTypeOption('dine-in'),
+                  buildOrderTypeOption('takeaway'),
+                  buildOrderTypeOption('delivery'),
+
+                  // ===== 2. CABANG (dine-in & takeaway) =====
+                  if (selectedOrderType == 'dine-in' ||
+                      selectedOrderType == 'takeaway') ...[
+                    sectionTitle('Pilih Cabang'),
+                    buildBranchSelector(),
+                  ],
+
+                  // ===== 3. NOMOR MEJA (dine-in only) =====
+                  if (selectedOrderType == 'dine-in') ...[
+                    sectionTitle('Nomor Meja'),
+                    TextField(
+                      controller: tableController,
+                      keyboardType: TextInputType.number,
+                      decoration: InputDecoration(
+                        prefixIcon: const Icon(Icons.table_restaurant,
+                            color: kPrimary),
+                        hintText: 'Contoh: 12',
+                        filled: true,
+                        fillColor: Colors.white,
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(14),
+                          borderSide: BorderSide.none,
+                        ),
+                      ),
+                    ),
+                  ],
+
+                  // ===== 4. ALAMAT (delivery only) =====
+                  if (selectedOrderType == 'delivery') ...[
+                    sectionTitle('Alamat Pengiriman'),
+                    TextField(
+                      controller: addressController,
+                      maxLines: 2,
+                      decoration: InputDecoration(
+                        prefixIcon:
+                        const Icon(Icons.location_on, color: kPrimary),
+                        filled: true,
+                        fillColor: Colors.white,
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(14),
+                          borderSide: BorderSide.none,
+                        ),
+                      ),
+                    ),
+                  ],
+
+                  // ===== 5. RINGKASAN PESANAN =====
                   sectionTitle('Ringkasan Pesanan'),
                   Card(
                     color: Colors.white,
@@ -244,24 +497,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                     ),
                   ),
 
-                  // Alamat pengiriman
-                  sectionTitle('Alamat Pengiriman'),
-                  TextField(
-                    controller: addressController,
-                    maxLines: 2,
-                    decoration: InputDecoration(
-                      prefixIcon:
-                      const Icon(Icons.location_on, color: kPrimary),
-                      filled: true,
-                      fillColor: Colors.white,
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(14),
-                        borderSide: BorderSide.none,
-                      ),
-                    ),
-                  ),
-
-                  // Metode pembayaran
+                  // ===== 6. METODE PEMBAYARAN =====
                   sectionTitle('Metode Pembayaran'),
                   for (final method in paymentMethods)
                     buildPaymentOption(method),
@@ -270,7 +506,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
             ),
           ),
 
-          // Total dan tombol Place Order
+          // ===== Total & Place Order =====
           Container(
             padding: const EdgeInsets.all(16),
             decoration: const BoxDecoration(
@@ -284,9 +520,9 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   priceRow('Subtotal', formatRupiah(widget.subtotal)),
-                  priceRow('Delivery Fee', formatRupiah(widget.deliveryFee)),
+                  priceRow(feeLabel, formatRupiah(currentFee)),
                   const Divider(),
-                  priceRow('Total Pembayaran', formatRupiah(widget.total),
+                  priceRow('Total Pembayaran', formatRupiah(currentTotal),
                       bold: true),
                   const SizedBox(height: 12),
                   SizedBox(

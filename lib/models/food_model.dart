@@ -8,6 +8,15 @@ const Color kSuccess = Color(0xFF7A8063);
 
 // Ongkos kirim tetap
 const int deliveryFee = 10000;
+// Takeaway charge
+const int takeawayCharge = 2000;
+
+// ====== DAFTAR CABANG ======
+const List<String> branches = [
+  'noom noom - Tanjung Duren',
+  'noom noom - Untar',
+  'noom noom - Mal Ciputra',
+];
 
 // ====== MODEL MAKANAN ======
 class Food {

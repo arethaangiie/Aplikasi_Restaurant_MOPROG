@@ -9,6 +9,7 @@ class CartScreen extends StatelessWidget {
   final void Function(CartItemModel) onDecrease;
   final void Function(CartItemModel) onRemove;
   final VoidCallback onOrderPlaced;
+  final String orderType;
 
   const CartScreen({
     super.key,
@@ -17,14 +18,26 @@ class CartScreen extends StatelessWidget {
     required this.onDecrease,
     required this.onRemove,
     required this.onOrderPlaced,
+    this.orderType = 'delivery',
   });
 
   int get subtotal =>
       cartItems.fold<int>(0, (sum, item) => sum + item.total);
 
-  int get fee => cartItems.isEmpty ? 0 : deliveryFee;
+  int get fee {
+    if (cartItems.isEmpty) return 0;
+    if (orderType == 'delivery') return deliveryFee;
+    if (orderType == 'takeaway') return takeawayCharge;
+    return 0; // dine-in
+  }
 
   int get total => subtotal + fee;
+
+  String get feeLabel {
+    if (orderType == 'delivery') return 'Delivery Fee';
+    if (orderType == 'takeaway') return 'Takeaway Charge';
+    return 'Service Charge';
+  }
 
   Widget summaryRow(String label, String value, {bool bold = false}) {
     return Padding(
@@ -116,7 +129,7 @@ class CartScreen extends StatelessWidget {
             child: Column(
               children: [
                 summaryRow('Subtotal', formatRupiah(subtotal)),
-                summaryRow('Delivery Fee', formatRupiah(fee)),
+                summaryRow(feeLabel, formatRupiah(fee)),
                 const Divider(),
                 summaryRow('Total', formatRupiah(total), bold: true),
                 const SizedBox(height: 12),
@@ -136,6 +149,7 @@ class CartScreen extends StatelessWidget {
                             deliveryFee: fee,
                             total: total,
                             onOrderPlaced: onOrderPlaced,
+                            orderType: orderType,
                           ),
                         ),
                       );
