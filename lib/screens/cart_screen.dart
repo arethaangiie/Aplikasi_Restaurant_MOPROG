@@ -39,6 +39,7 @@ class CartScreen extends StatelessWidget {
     return 'Service Charge';
   }
 
+
   Widget summaryRow(String label, String value, {bool bold = false}) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 3),
