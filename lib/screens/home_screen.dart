@@ -162,17 +162,103 @@ class HomeScreen extends StatelessWidget {
           ),
           const SizedBox(height: 30),
 
-          // Banner
-          ClipRRect(
-            borderRadius: BorderRadius.circular(20),
-            child: Image.asset(
-              'assets/images/banner.png',
-              width: double.infinity,
-              height: 180,
-              fit: BoxFit.cover,
+          // 3. Bagian card
+          const Text(
+            'Special Offers',
+            style: TextStyle(
+              color: kTextDark,
+              fontSize: 18,
+              fontWeight: FontWeight.bold,
             ),
           ),
+          const SizedBox(height: 12),
+          Wrap(
+            spacing: 16,
+            runSpacing: 16,
+            alignment: WrapAlignment.center,
+            children: [
+              buildPromoCard(
+                imagePath: 'assets/images/banner.png',
+                title: 'Temukan Suasana Favoritmu!',
+                onTap: () {},
+              ),
+              buildPromoCard(
+                imagePath: 'assets/images/banner2.png',
+                title: 'Segarkan Harimu!',
+                onTap: () {},
+              ),
+              buildPromoCard(
+                imagePath: 'assets/images/banner3.png',
+                title: 'Teman Santai Seharian',
+                onTap: () {},
+              ),
+              buildPromoCard(
+                imagePath: 'assets/images/banner4.png',
+                title: 'Hangat dari Oven',
+                onTap: () {},
+              ),
+            ],
+          ),
         ],
+      ),
+    );
+  }
+
+  // Widget pembantu untuk kartu promo
+  Widget buildPromoCard({
+    required String imagePath,
+    required String title,
+    required VoidCallback onTap,
+  }) {
+    return Container(
+      width: 300,
+      margin: const EdgeInsets.only(bottom: 16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(20),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.05),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(20),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            ClipRRect(
+              borderRadius: const BorderRadius.vertical(
+                top: Radius.circular(20),
+              ),
+              child: Image.asset(
+                imagePath,
+                height: 160,
+                width: double.infinity,
+                fit: BoxFit.cover,
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.all(16),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    title,
+                    style: const TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 16,
+                      color: Colors.black87,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
