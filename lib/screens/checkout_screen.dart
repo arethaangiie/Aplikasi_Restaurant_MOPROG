@@ -117,7 +117,6 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
 
   int get currentTotal => widget.subtotal + currentFee;
 
-
   Widget sectionTitle(String text) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 8, top: 8),

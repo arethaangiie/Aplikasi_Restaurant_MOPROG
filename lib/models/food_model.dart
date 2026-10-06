@@ -62,7 +62,6 @@ class CartItemModel {
   String get optionText => '$size • $topping • $spicy';
 }
 
-
 // ====== FORMAT RUPIAH: 65000 -> Rp 65.000 ======
 String formatRupiah(int number) {
   final s = number.toString();
